@@ -1,0 +1,157 @@
+import java.util.*;
+
+public class StandardCombinatorics {
+    /**
+     * Returns a list of all binary strings of length n
+     */
+    public static List<String> getBinaryStrings(int n) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        for(int i=0; i<n; i++){
+            Solver.Variable newVar = new Solver.Variable(Arrays.asList(0,1),-1, -1);
+            variables.add(newVar);
+            constraints.add(new Solver.NoConstraint(newVar));
+        }
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+        
+        List<String> ret = new ArrayList<>();
+        for(int[] sol : result){
+            String s = "";
+            for(int i=0; i<sol.length; i++){
+                s += sol[i] == 0 ? "0" : "1";
+            }
+            ret.add(s);
+        }
+        return ret;
+    }
+
+    /**
+     * Returns a list of all combinations of k elements from the set {1,...,n} without repetitions
+     */
+    public static List<int[]> getCombinationsWithoutRepetition(int n, int k) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        // Add variables and constraints
+        for(int i=0; i<k; i++){
+            List<Integer> v = new ArrayList<>();
+            for(int j=0; j<n; j++){
+                v.add(j+1);
+            }
+            Solver.Variable newVar = new Solver.Variable(v,-1, -1);
+            variables.add(newVar);
+            constraints.add(new Solver.CombinationsWithoutRepetitionConstraint(newVar));
+        }
+
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+
+        // List<String> ret = new ArrayList<>();
+        // for(int[] sol : result){
+        //     String s = "";
+        //     for(int i=0; i<sol.length; i++){
+        //         s += sol[i] == 0 ? "0" : "1";
+        //     }
+        //     ret.add(s);
+        // }
+        return result;
+    }
+
+    /**
+     * Returns a list of all combinations of k elements from the set {1,...,n} with repetitions
+     */
+    public static List<int[]> getCombinationsWithRepetition(int n, int k) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        // TODO: add your variables
+
+        // TODO: add your constraints
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+
+        // TODO: use result to construct answer
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of all subsets in the set {1,...,n}
+     */
+    public static List<int[]> getSubsets(int n) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        // TODO: add your variables
+
+        // TODO: add your constraints
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+
+        // TODO: use result to construct answer
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of all permutations in the set {1,...,n}
+     */
+    public static List<int[]> getSetPermutations(int n) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        // TODO: add your variables
+
+        // TODO: add your constraints
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+
+        // TODO: use result to construct answer
+        return new ArrayList<>();
+    }
+}
