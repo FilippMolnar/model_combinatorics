@@ -1,31 +1,6 @@
 import java.util.*;
 
 class Solver {
-
-    // Example implementation of the Constraint interface.
-    // It enforces that for given variable X, it holds that 5 < X < 10.
-    //
-    // This particular constraint will most likely not be very useful to you...
-    // Remove it and design a few constraints that *can* help you!
-    static abstract class BetweenFiveAndTenConstraint {
-        Variable var;
-
-        public BetweenFiveAndTenConstraint(Variable var) {
-            this.var = var;
-        }
-
-        void infer() {
-            List<Integer> newDomain = new LinkedList<>();
-
-            for (Integer x : this.var.domain) {
-                if (5 < x && x < 10)
-                    newDomain.add(x);
-            }
-
-            this.var.domain = newDomain;
-        }
-    }
-
     static class CombinationsWithoutRepetitionConstraint extends Constraint{
         Variable var;
 
@@ -33,15 +8,17 @@ class Solver {
             this.var = var;
         }
 
-        void infer(Variable previousVariable) {
+        void infer(Deque<VariableAssigned> tmp_sol) {
             List<Integer> newDomain = new LinkedList<>();
 
             for (Integer x : this.var.domain) {
-                if (x > previousVariable.value)
+                if (x > tmp_sol.getLast().value)
                     newDomain.add(x);
             }
 
-            this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
+            // System.out.println(newDomain.toString());
+            // this.var.domain = newDomain;
         }
     }
 
@@ -53,15 +30,17 @@ class Solver {
             this.var = var;
         }
 
-        void infer(Variable previousVariable) {
+        void infer(Deque<VariableAssigned> tmp_sol) {
             List<Integer> newDomain = new LinkedList<>();
 
             for (Integer x : this.var.domain) {
-                if (x >= previousVariable.value)
+                if (x >= tmp_sol.getLast().value)
                     newDomain.add(x);
             }
 
-            this.var.domain = newDomain;
+            // this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
+
         }
     }
 
@@ -72,19 +51,17 @@ class Solver {
             this.var = var;
         }
 
-        void infer(Variable previousVariable) {
+        void infer(Deque<VariableAssigned> tmp_sol) {
             List<Integer> newDomain = new LinkedList<>();
 
             for (Integer x : this.var.domain) {
-                // if s[i-1] == 0:
-                //     flag = true
-                // else:
-                //     flag = s[i]>s[i-1]
-                if (previousVariable.value == 0 || x > previousVariable.value)
+                if (tmp_sol.getLast().value == 0 || x > tmp_sol.getLast().value){
                     newDomain.add(x);
+                }
             }
 
-            this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
+            // this.var.domain = newDomain;
         }
     }
 
@@ -95,15 +72,24 @@ class Solver {
             this.var = var;
         }
 
-        void infer(Variable previousVariable) {
+        void infer(Deque<VariableAssigned> tmp_sol) {
             List<Integer> newDomain = new LinkedList<>();
-
-            for (Integer x : this.var.domain) {
-                if (x != previousVariable.value)
+            
+            for(int x : this.var.domain){
+                boolean flag = false;
+                for (VariableAssigned v : tmp_sol) {                
+                    if(x == v.value){
+                        flag = true;
+                        continue;
+                    }
+                }
+                if(flag == false){
                     newDomain.add(x);
+                }
             }
 
-            this.var.domain = newDomain;
+            // this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
         }
     }
 
@@ -114,19 +100,22 @@ class Solver {
             this.var = var;
         }
 
-        void infer(Variable previousVariable) {
+        void infer(Deque<VariableAssigned> tmp_sol) {
             
         }
     }
 
     static class Variable {
         List<Integer> domain;
+        Deque<List<Integer>> domains;
         List<Integer> copyDomain;
         int index;
         int value;
 
         public Variable(List<Integer> domain, int value, int index) {
             this.domain = domain;
+            this.domains = new LinkedList<>();
+            this.domains.addLast(domain);
             this.copyDomain = new ArrayList<>();
             this.copyDomain.addAll(domain);
             this.index = index;
@@ -136,18 +125,13 @@ class Solver {
     }
 
     static abstract class Constraint {
-        /**
-         * Tries to reduce the domain of the variables associated to this constraint, using inference
-         */
-        abstract void infer(Variable variable);
+        abstract void infer(Deque<VariableAssigned> tmp_sol);
     }
 
 
     Variable[] variables;
-    Variable[] propagatedVariables;
     Constraint[] constraints;
     List<int[]> solutions;
-    // you can add more attributes
 
     /**
      * Constructs a solver.
@@ -156,68 +140,73 @@ class Solver {
      */
     public Solver(Variable[] variables, Constraint[] constraints) {
         this.variables = variables;
-        this.propagatedVariables = variables.clone();
 
         this.constraints = constraints;
 
         solutions = new LinkedList<>();
     }
 
-    void propagate(Variable variable, int index){
-        for(int i=index+1; i<variables.length; i++){
-            constraints[i].infer(variable);
-        }
-    }
-
-    int[] convertToArray(Deque<Integer> tmp_sol){
+    int[] convertToArray(Deque<VariableAssigned> tmp_sol){
         int n = tmp_sol.size();
         int[] ret = new int[n];
         int i=0;
-        for(int el:tmp_sol){
-            ret[i++] = el;
+        for(VariableAssigned el:tmp_sol){
+            ret[i++] = el.value;
         }
         return ret;
     }
 
-    void printSol(Deque<Integer> tmp_sol){
+    void printSol(Deque<VariableAssigned> tmp_sol){
         System.out.print("tmp_sol");
-        for(int el:tmp_sol){
-            System.out.print(el);
-
+        for(VariableAssigned el:tmp_sol){
+            System.out.print(el.value);
         }
         System.out.println();
+    }
+
+    static class VariableAssigned {
+        int place;
+        int index;
+        int value;
+
+        public VariableAssigned(int place, int value, int index) {
+            this.place = place;
+            this.index = index;
+            this.value = value;
+        }
+
     }
 
     /**
      * Solves the problem using search and inference.
      */
     void search(boolean findAllSolutions /* you can add more params */) {
-        Deque<Integer> tmp_sol = new LinkedList<>();
-        Deque<Variable> assStack = new LinkedList<>();
+        Deque<VariableAssigned> tmp_sol = new LinkedList<>();
+        Deque<VariableAssigned> assStack = new LinkedList<>();
         
         for(int i=0; i<variables[0].domain.size(); i++){
-            assStack.addLast(new Variable(variables[0].domain, variables[0].domain.get(i), 0));
+            assStack.addLast(new VariableAssigned(0, variables[0].domain.get(i), i));
         }
         while(!assStack.isEmpty()){
-            Variable var = assStack.removeLast();
-            while(tmp_sol.size() > var.index){
-                for(int i=var.index+1; i<variables.length; i++){
-                    variables[i].domain = new ArrayList<>();
-                    variables[i].domain.addAll(variables[i].copyDomain);
+            VariableAssigned var = assStack.removeLast();
+            while(tmp_sol.size() > var.place){
+                if(variables[tmp_sol.size()].domains.size() > 1){
+                    variables[tmp_sol.size()].domains.removeLast();
                 }
                 tmp_sol.removeLast();
             }
-            tmp_sol.addLast(var.value);
+            tmp_sol.addLast(var);
             int size = tmp_sol.size();
+
+            //found solution
             if(size == variables.length){
                 solutions.add(convertToArray(tmp_sol));
-                printSol(tmp_sol);
                 tmp_sol.removeLast();
                 continue;
             }
-            propagate(var, tmp_sol.size()-1);
-            for(int i=0; i<variables[size].domain.size(); i++){
-                assStack.addLast(new Variable(variables[size].domain, variables[size].domain.get(i), size));
+            constraints[tmp_sol.size()].infer(tmp_sol);
+            for(int i=0; i<variables[size].domains.getLast().size(); i++){
+                assStack.addLast(new VariableAssigned(size, variables[size].domains.getLast().get(i), i));
             }
 
         }
