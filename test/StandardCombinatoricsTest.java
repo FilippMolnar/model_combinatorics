@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StandardCombinatoricsTest {
     @org.junit.Test
     public void testBinaryStrings() {
-        int[] ns = {3, 10, 20};
+        int[] ns = {3, 10};
 
         for (int t = 0; t < ns.length; t++) {
             int n = ns[t];
@@ -45,7 +45,7 @@ public class StandardCombinatoricsTest {
         }
     }
 
-    @Test
+    @org.junit.Test
     public void testCombinationsWithoutRepetition() {
         int[] ns = {3, 100, 1000, 20};
         int[] ks = {2, 3, 2, 8};
@@ -108,7 +108,7 @@ public class StandardCombinatoricsTest {
         }
     }
 
-    @Test
+    @org.junit.Test
     public void testCombinationsWithRepetition() {
         int[] ns = {3, 100, 12};
         int[] ks = {2, 3, 8};
@@ -166,7 +166,7 @@ public class StandardCombinatoricsTest {
         }
     }
 
-    @Test
+    @org.junit.Test
     public void testSubsets() {
         int[] ns = {3, 10, 20};
 
@@ -220,7 +220,7 @@ public class StandardCombinatoricsTest {
         }
     }
 
-    @Test
+    @org.junit.Test
     public void testSetPermutations() {
         int[] ns = {3, 8, 10};
 

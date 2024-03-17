@@ -55,7 +55,6 @@ public class StandardCombinatorics {
             constraints.add(new Solver.CombinationsWithoutRepetitionConstraint(newVar));
         }
 
-
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
         variablesArray = variables.toArray(variablesArray);
@@ -66,14 +65,6 @@ public class StandardCombinatorics {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        // List<String> ret = new ArrayList<>();
-        // for(int[] sol : result){
-        //     String s = "";
-        //     for(int i=0; i<sol.length; i++){
-        //         s += sol[i] == 0 ? "0" : "1";
-        //     }
-        //     ret.add(s);
-        // }
         return result;
     }
 
@@ -85,9 +76,15 @@ public class StandardCombinatorics {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
-
-        // TODO: add your constraints
+        for(int i=0; i<k; i++){
+            List<Integer> v = new ArrayList<>();
+            for(int j=0; j<n; j++){
+                v.add(j+1);
+            }
+            Solver.Variable newVar = new Solver.Variable(v,-1, -1);
+            variables.add(newVar);
+            constraints.add(new Solver.CombinationsWithRepetitionConstraint(newVar));
+        }
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -99,8 +96,7 @@ public class StandardCombinatorics {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        // TODO: use result to construct answer
-        return new ArrayList<>();
+        return result;
     }
 
     /**
@@ -111,9 +107,15 @@ public class StandardCombinatorics {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
-
-        // TODO: add your constraints
+        for(int i=0; i<n; i++){
+            List<Integer> v = new ArrayList<>();
+            for(int j=0; j<=n; j++){
+                v.add(j);
+            }
+            Solver.Variable newVar = new Solver.Variable(v,-1, -1);
+            variables.add(newVar);
+            constraints.add(new Solver.SubsetsConstraint(newVar));
+        }
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -125,8 +127,22 @@ public class StandardCombinatorics {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        // TODO: use result to construct answer
-        return new ArrayList<>();
+        List<int[]> ret = new ArrayList<>();
+        for(int[] sol : result){
+            int k = 0;
+            for(int i=0; i<sol.length; i++){
+                if(sol[i] != 0) k++;
+            }
+            int[] subset = new int[k];
+            k=0;
+            for(int i=0; i<sol.length; i++){
+                if(sol[i] != 0){
+                    subset[k++] = sol[i];
+                }
+            }
+            ret.add(subset);
+        }
+        return ret;
     }
 
     /**
@@ -137,9 +153,15 @@ public class StandardCombinatorics {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
-
-        // TODO: add your constraints
+        for(int i=0; i<n; i++){
+            List<Integer> v = new ArrayList<>();
+            for(int j=0; j<n; j++){
+                v.add(j+1);
+            }
+            Solver.Variable newVar = new Solver.Variable(v,-1, -1);
+            variables.add(newVar);
+            constraints.add(new Solver.PermutationsConstraint(newVar));
+        }
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -151,7 +173,6 @@ public class StandardCombinatorics {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        // TODO: use result to construct answer
-        return new ArrayList<>();
+        return result;
     }
 }

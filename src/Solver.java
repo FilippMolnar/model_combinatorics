@@ -45,6 +45,68 @@ class Solver {
         }
     }
 
+
+    static class CombinationsWithRepetitionConstraint extends Constraint{
+        Variable var;
+
+        public CombinationsWithRepetitionConstraint(Variable var) {
+            this.var = var;
+        }
+
+        void infer(Variable previousVariable) {
+            List<Integer> newDomain = new LinkedList<>();
+
+            for (Integer x : this.var.domain) {
+                if (x >= previousVariable.value)
+                    newDomain.add(x);
+            }
+
+            this.var.domain = newDomain;
+        }
+    }
+
+    static class SubsetsConstraint extends Constraint{
+        Variable var;
+
+        public SubsetsConstraint(Variable var) {
+            this.var = var;
+        }
+
+        void infer(Variable previousVariable) {
+            List<Integer> newDomain = new LinkedList<>();
+
+            for (Integer x : this.var.domain) {
+                // if s[i-1] == 0:
+                //     flag = true
+                // else:
+                //     flag = s[i]>s[i-1]
+                if (previousVariable.value == 0 || x > previousVariable.value)
+                    newDomain.add(x);
+            }
+
+            this.var.domain = newDomain;
+        }
+    }
+
+    static class PermutationsConstraint extends Constraint{
+        Variable var;
+
+        public PermutationsConstraint(Variable var) {
+            this.var = var;
+        }
+
+        void infer(Variable previousVariable) {
+            List<Integer> newDomain = new LinkedList<>();
+
+            for (Integer x : this.var.domain) {
+                if (x != previousVariable.value)
+                    newDomain.add(x);
+            }
+
+            this.var.domain = newDomain;
+        }
+    }
+
     static class NoConstraint extends Constraint{
         Variable var;
 
@@ -59,14 +121,18 @@ class Solver {
 
     static class Variable {
         List<Integer> domain;
+        List<Integer> copyDomain;
         int index;
         int value;
 
         public Variable(List<Integer> domain, int value, int index) {
             this.domain = domain;
+            this.copyDomain = new ArrayList<>();
+            this.copyDomain.addAll(domain);
             this.index = index;
             this.value = value;
         }
+
     }
 
     static abstract class Constraint {
@@ -98,7 +164,7 @@ class Solver {
     }
 
     void propagate(Variable variable, int index){
-        for(int i=index; i<variables.length; i++){
+        for(int i=index+1; i<variables.length; i++){
             constraints[i].infer(variable);
         }
     }
@@ -113,6 +179,15 @@ class Solver {
         return ret;
     }
 
+    void printSol(Deque<Integer> tmp_sol){
+        System.out.print("tmp_sol");
+        for(int el:tmp_sol){
+            System.out.print(el);
+
+        }
+        System.out.println();
+    }
+
     /**
      * Solves the problem using search and inference.
      */
@@ -125,13 +200,18 @@ class Solver {
         }
         while(!assStack.isEmpty()){
             Variable var = assStack.removeLast();
-            while(tmp_sol.size() > var.index) tmp_sol.removeLast();
-            
+            while(tmp_sol.size() > var.index){
+                for(int i=var.index+1; i<variables.length; i++){
+                    variables[i].domain = new ArrayList<>();
+                    variables[i].domain.addAll(variables[i].copyDomain);
+                }
+                tmp_sol.removeLast();
+            }
             tmp_sol.addLast(var.value);
-            System.out.println(tmp_sol);
             int size = tmp_sol.size();
             if(size == variables.length){
                 solutions.add(convertToArray(tmp_sol));
+                printSol(tmp_sol);
                 tmp_sol.removeLast();
                 continue;
             }
