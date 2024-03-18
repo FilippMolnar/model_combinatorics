@@ -10,13 +10,15 @@ public class NQueens {
         List<Solver.Constraint> constraints = new ArrayList<>();
 
         for(int i=0; i<n; i++){
-            List<Integer> v = new ArrayList<>();
+            List<Integer> domain = new ArrayList<>();
             for(int j=0; j<=n; j++){
-                v.add(j);
+                domain.add(j);
             }
-            Solver.Variable newVar = new Solver.Variable(v,-1, -1);
+            Solver.Variable newVar = new Solver.Variable(domain,-1, i);
             variables.add(newVar);
-            constraints.add(new Solver.SubsetsConstraint(newVar));
+            // ADD COLUMN AND DIAGONAL CONSTRAINTS
+            // ADD SYMMETRY BREAKING CONSTRAINT - ALWAYS GO FROM TOP TO BOTTOM ROW
+            // constraints.add(new Solver.SubsetsConstraint(newVar));
         }
         // TODO: add your constraints
 
