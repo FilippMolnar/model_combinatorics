@@ -1,6 +1,91 @@
 import java.util.*;
 
 class Solver {
+
+    static class SudokuConstraint extends Constraint{
+        Variable var;
+
+        public SudokuConstraint(Variable var) {
+            this.var = var;
+        }
+
+        void infer(Deque<VariableAssigned> tmp_sol) {
+            List<Integer> newDomain = new LinkedList<>();
+            
+            for(int x : this.var.domain){
+                boolean flag = false;
+                for (VariableAssigned v : tmp_sol) {
+                    int n = this.var.variablesLength;
+                    int size = n*n;
+                    // Check if variable value in the domain
+                    if(x == v.value){
+                        // Check if variables in the same row
+                        if(this.var.index / size == v.place / size){
+                            flag = true;
+                            continue;
+                        }
+                        // Check if variables in the same column
+                        if(this.var.index % size == v.place % size){
+                            flag = true;
+                            continue;
+                        }
+                        // Check if variables in the same nine
+                        if(((this.var.index / n) % n == (v.place / n) % n) && ((this.var.index / (size * n)) % n == (v.place / (size * n)) % n)){
+                            flag = true;
+                            continue;
+                        }
+                    }
+                }
+                if(flag == false){
+                    newDomain.add(x);
+                }
+            }
+
+            // this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
+        }
+    }
+
+
+    // ABOUT SYMMETRY BREAKING CONSTRAINT:
+    // Our Solver uses DFS that starts with the first variable, tries every value from the domain,
+    // propagates the constraints for the next (second) variable, and tries all the remaining 
+    // values from the domain. Since we encoded our rows as variables in the same order, 
+    // our algorithm will always place queens on rows in the same order, thus breaking symmetry.
+    static class NQueensConstraint extends Constraint{
+        Variable var;
+
+        public NQueensConstraint(Variable var) {
+            this.var = var;
+        }
+
+        void infer(Deque<VariableAssigned> tmp_sol) {
+            List<Integer> newDomain = new LinkedList<>();
+            
+            for(int x : this.var.domain){
+                boolean flag = false;
+                for (VariableAssigned v : tmp_sol) {
+                    // no column                
+                    if(x == v.value){
+                        flag = true;
+                        continue;
+                    }
+                    //no diagonal
+                    if((v.value + v.place == x + this.var.index) || (v.value - v.place == x - this.var.index)){
+                        flag = true;
+                        continue;
+                    }
+                }
+                if(flag == false){
+                    newDomain.add(x);
+                }
+            }
+
+            // this.var.domain = newDomain;
+            this.var.domains.addLast(newDomain);
+        }
+    }
+
     static class CombinationsWithoutRepetitionConstraint extends Constraint{
         Variable var;
 
@@ -110,6 +195,7 @@ class Solver {
         Deque<List<Integer>> domains;
         List<Integer> copyDomain;
         int index;
+        int variablesLength;
         int value;
 
         public Variable(List<Integer> domain, int value, int index) {
@@ -201,6 +287,9 @@ class Solver {
             //found solution
             if(size == variables.length){
                 solutions.add(convertToArray(tmp_sol));
+                if(findAllSolutions == false){
+                    return;
+                }
                 tmp_sol.removeLast();
                 continue;
             }

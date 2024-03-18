@@ -12,9 +12,28 @@ public class Sudoku {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
+        int n = grid.length;
+        int sqr = (int)Math.sqrt(n);
+        List<Integer> domain = new ArrayList<>();
+        for(int i=1; i<=n; i++){
+            domain.add(i);
+        }
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                List<Integer> d = new ArrayList<>();
+                if(grid[i][j] == -1){
+                    d.addAll(domain);
+                } else {
+                    d.add(grid[i][j]);
+                }
+                
+                Solver.Variable newVar = new Solver.Variable(d,-1, i*n+j);
+                newVar.variablesLength = sqr;
+                variables.add(newVar);
+                constraints.add(new Solver.SudokuConstraint(newVar));
+            }
+        }
 
-        // TODO: add your constraints
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -26,7 +45,12 @@ public class Sudoku {
         Solver solver = new Solver(variablesArray, constraintsArray);
         int[] result = solver.findOneSolution();
 
-        // TODO: use result to construct answer
+        
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                grid[i][j] = result[i*n+j];
+            }
+        }
         return grid;
     }
 }
