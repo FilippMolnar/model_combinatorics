@@ -193,7 +193,6 @@ class Solver {
     static class Variable {
         List<Integer> domain;
         Deque<List<Integer>> domains;
-        List<Integer> copyDomain;
         int index;
         int variablesLength;
         int value;
@@ -202,8 +201,6 @@ class Solver {
             this.domain = domain;
             this.domains = new LinkedList<>();
             this.domains.addLast(domain);
-            this.copyDomain = new ArrayList<>();
-            this.copyDomain.addAll(domain);
             this.index = index;
             this.value = value;
         }

@@ -14,17 +14,42 @@ public class Sudoku {
 
         int n = grid.length;
         int sqr = (int)Math.sqrt(n);
-        List<Integer> domain = new ArrayList<>();
+        Set<Integer> domain = new HashSet<>();
         for(int i=1; i<=n; i++){
             domain.add(i);
         }
         for(int i=0; i<n; i++){
             for(int j=0; j<n; j++){
+                
                 List<Integer> d = new ArrayList<>();
-                if(grid[i][j] == -1){
-                    d.addAll(domain);
-                } else {
+                if(grid[i][j] != -1){
                     d.add(grid[i][j]);
+                } else {
+                    Set<Integer> tmpd = new HashSet<>();
+                    tmpd.addAll(domain);
+                    for(int k=0; k<n; k++){
+                        if(grid[i][k] != -1){
+                            tmpd.remove(grid[i][k]);
+                        }
+                        if(grid[k][j] != -1){
+                            tmpd.remove(grid[k][j]);
+                        }
+                    }
+                    int si = i/sqr;
+                    si*=sqr;
+                    int sj = j/sqr;
+                    sj*=sqr;
+                    // System.out.println(i/sqr);
+                    // System.out.println(j/sqr);
+                    for(int k = si; k<si+sqr; k++){
+                        for(int l = sj; l<sj+sqr; l++){
+                            if(grid[k][l] != -1){
+                                tmpd.remove(grid[k][l]);
+                            }
+                        }
+                    }
+                    d.addAll(tmpd);
+                    // System.out.println(d.toString());
                 }
                 
                 Solver.Variable newVar = new Solver.Variable(d,-1, i*n+j);
