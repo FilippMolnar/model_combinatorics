@@ -62,7 +62,6 @@ public class Sudoku {
                     // System.out.println(d.toString());
                 }
                 List<Integer> aff = new ArrayList<>(affects);
-                Collections.reverse(d);
                 Solver.Variable newVar = new Solver.Variable(d,-1, i*n+j, aff);
                 newVar.variablesLength = sqr;
                 variables.add(newVar);

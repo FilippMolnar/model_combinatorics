@@ -341,15 +341,16 @@ class Solver {
     boolean propagate2(Deque<VariableAssigned> sol, PriorityQueue<VariablePQ> pq, boolean[] usedPlace){
         List<Integer> affected = variables[sol.getLast().index].affects;
         for(int a : affected){
-            VariablePQ newVar = new VariablePQ(variables[a].index, variables[a].domains.getLast().size());
-            if(pq.remove(newVar)){
-                constraints[a].infer(sol);
-                newVar.domainSize = variables[a].domains.getLast().size();
-                if(!usedPlace[a]) pq.add(newVar);
-                if(newVar.domainSize == 0){
-                    return false;
+            if(!usedPlace[a]){
+                VariablePQ newVar = new VariablePQ(variables[a].index, variables[a].domains.getLast().size());
+                if(pq.remove(newVar)){
+                    constraints[a].infer(sol);
+                    newVar.domainSize = variables[a].domains.getLast().size();
+                    pq.add(newVar);
+                    if(newVar.domainSize == 0){
+                        return false;
+                    }
                 }
-
             }
         }
         return true;
@@ -359,18 +360,15 @@ class Solver {
         List<Integer> affected = variables[last.index].affects;
         for(int a : affected){
             Deque<List<Integer>> domains = variables[a].domains;
-            if(domains.size() > 1){
+            if(domains.size() > 1 && !usedPlace[a]){
                 VariablePQ newVar = new VariablePQ(a, domains.getLast().size());
-                if(!usedPlace[a]){ 
-                    domains.removeLast();
-                    if(pq.remove(newVar)){
-                        newVar.domainSize = domains.getLast().size();
-                        pq.add(newVar);
-                    }
+                domains.removeLast();
+                if(pq.remove(newVar)){
+                    newVar.domainSize = domains.getLast().size();
+                    pq.add(newVar);
                 }
             }
         }
-
     }
 
     /**

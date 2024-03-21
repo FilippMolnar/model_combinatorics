@@ -29,6 +29,7 @@
                 continue;
             }
             constraints[tmp_sol.size()].infer(tmp_sol);
+            
             for(int i=0; i<variables[size].domains.getLast().size(); i++){
                 assStack.addLast(new VariableAssigned(size, variables[size].domains.getLast().get(i), i));
             }
