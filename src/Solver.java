@@ -8,33 +8,17 @@ class Solver {
         public SudokuConstraint(Variable var) {
             this.var = var;
         }
-
         void infer(Deque<VariableAssigned> tmp_sol) {
-            List<Integer> newDomain = new LinkedList<>();
+            Set<Integer> newDomain = new HashSet<>(this.var.domains.getLast());
             
-            VariableAssigned last = tmp_sol.getLast();
-            int n = this.var.variablesLength;
-            int size = n*n;
-            for(int x : this.var.domains.getLast()){
-                // Check if variables in the same row
-                // if(this.var.index / size == last.index / size){
-                //     continue;
-                // }
-                // // Check if variables in the same column
-                // if(this.var.index % size == last.index % size){
-                //     continue;
-                // }
-                // // Check if variables in the same nine
-                // if(((this.var.index / n) % n == (last.index / n) % n) && ((this.var.index / (size * n)) % n == (last.index / (size * n)) % n)){
-                //     continue;
-                // }
-                if(x != last.value){
-                    newDomain.add(x);
+            for (VariableAssigned v : tmp_sol) {
+                if(this.var.affects.contains(v.index)){
+                    newDomain.remove(v.value);
                 }
             }
 
             // this.var.domain = newDomain;
-            this.var.domains.addLast(newDomain);
+            this.var.domains.addLast(new ArrayList<>(newDomain));
         }
     }
 
@@ -128,7 +112,6 @@ class Solver {
                 }
             }
 
-            // this.var.domain = newDomain;
             this.var.domains.addLast(newDomain);
 
         }
@@ -329,6 +312,12 @@ class Solver {
                     }   
                 }
             }
+            if(var.index == 61){
+                int[] sol = convertToArray(tmp_sol);
+                int[] s = new int[]{sol[57],sol[58],sol[59],sol[60]};
+
+                int a = 5;
+            }
 
             tmp_sol.addLast(var);
             usedPlace[var.index] = true;
@@ -360,6 +349,12 @@ class Solver {
         for(int a : affected){
             VariablePQ newVar = new VariablePQ(variables[a].index, variables[a].domains.getLast().size());
             if(pq.remove(newVar)){
+                if(a == 61 && variables[a].domains.size() == 1){
+                    int[] solut = convertToArray(sol);
+                    int[] s = new int[]{solut[57],solut[58],solut[59],solut[60]};
+                    
+                    int b = 5;
+                }
                 constraints[a].infer(sol);
                 newVar.domainSize = variables[a].domains.getLast().size();
                 if(!usedPlace[a]) pq.add(newVar);
@@ -389,93 +384,6 @@ class Solver {
         }
 
     }
-
-    void search3(boolean findAllSolutions /* you can add more params */) {
-        Deque<VariableAssigned> tmp_sol = new LinkedList<>();
-        PriorityQueue<Variable> pq = new PriorityQueue<>();
-        Deque<VariableAssigned> assStack = new LinkedList<>();
-        Set<Integer> used = new HashSet<>();
-        boolean[] inpq = new boolean[variables.length];
-        //init priority queue
-        for(int i=0; i<variables.length; i++){
-            pq.add(variables[i]);
-            inpq[i] = true;
-        }
-        //init assStack
-        Variable var = pq.remove();
-        for(int i=0; i<var.domains.getLast().size(); i++){
-            assStack.addLast(new VariableAssigned(var.index, var.domains.getLast().get(i)));
-        }
-
-        while(!assStack.isEmpty()){
-            VariableAssigned varAss = assStack.removeLast();
-            if(used.contains(varAss.index)){
-                while(varAss.index != tmp_sol.getLast().index){
-                    if(!inpq[tmp_sol.getLast().index]) pq.add(variables[tmp_sol.getLast().index]);
-                    used.remove(tmp_sol.getLast().index);
-                    repropagate(tmp_sol, pq);
-                }
-                if(varAss.index == tmp_sol.getLast().index){
-                    repropagate(tmp_sol, pq);
-                }
-
-            }
-            tmp_sol.addLast(varAss);
-            used.add(varAss.index);
-            int size = tmp_sol.size();
-
-            if(size == variables.length){
-                printSol(tmp_sol);
-                solutions.add(convertToArray(tmp_sol));
-                if(findAllSolutions == false){
-                    return;
-                }
-                used.remove(tmp_sol.getLast().index);
-                
-                if(!inpq[tmp_sol.getLast().index]) pq.add(variables[tmp_sol.getLast().index]);
-                tmp_sol.removeLast();
-                continue;
-            }
-            // infer
-            if(!propagate(tmp_sol, pq)){
-                continue;
-            }
-            if(pq.size() >= 1){
-                Variable smallestVariable = pq.remove();
-                inpq[smallestVariable.index] = false;
-                List<Integer> dom = smallestVariable.domains.getLast();
-                for(int i=0; i<dom.size(); i++){
-                    assStack.addLast(new VariableAssigned(smallestVariable.index, dom.get(i)));
-                }
-            }
-            
-        }
-    }
-
-    boolean propagate(Deque<VariableAssigned> sol, PriorityQueue<Variable> pq){
-        List<Integer> affected = variables[sol.getLast().index].affects;
-        for(int a : affected){
-            if(pq.remove(variables[a])){
-                constraints[a].infer(sol);
-                if(variables[a].domain.size() == 0) return false;
-                // pq.add(variables[a]);
-            }
-        }
-        return true;
-    }
-
-    void repropagate(Deque<VariableAssigned> sol, PriorityQueue<Variable> pq){
-        VariableAssigned varAss = sol.getLast();
-        List<Integer> affected = variables[varAss.index].affects;
-        for(int a : affected){
-            if(variables[a].domains.size() > 1){
-                variables[a].domains.removeLast();
-            }
-        }
-        sol.removeLast();
-
-    }
-
 
     /**
      * Searches for one solution that satisfies the constraints.
