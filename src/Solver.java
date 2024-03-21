@@ -312,12 +312,6 @@ class Solver {
                     }   
                 }
             }
-            if(var.index == 61){
-                int[] sol = convertToArray(tmp_sol);
-                int[] s = new int[]{sol[57],sol[58],sol[59],sol[60]};
-
-                int a = 5;
-            }
 
             tmp_sol.addLast(var);
             usedPlace[var.index] = true;
@@ -349,12 +343,6 @@ class Solver {
         for(int a : affected){
             VariablePQ newVar = new VariablePQ(variables[a].index, variables[a].domains.getLast().size());
             if(pq.remove(newVar)){
-                if(a == 61 && variables[a].domains.size() == 1){
-                    int[] solut = convertToArray(sol);
-                    int[] s = new int[]{solut[57],solut[58],solut[59],solut[60]};
-                    
-                    int b = 5;
-                }
                 constraints[a].infer(sol);
                 newVar.domainSize = variables[a].domains.getLast().size();
                 if(!usedPlace[a]) pq.add(newVar);

@@ -34,3 +34,90 @@
             }
         }
     }
+
+
+    void search3(boolean findAllSolutions /* you can add more params */) {
+        Deque<VariableAssigned> tmp_sol = new LinkedList<>();
+        PriorityQueue<Variable> pq = new PriorityQueue<>();
+        Deque<VariableAssigned> assStack = new LinkedList<>();
+        Set<Integer> used = new HashSet<>();
+        boolean[] inpq = new boolean[variables.length];
+        //init priority queue
+        for(int i=0; i<variables.length; i++){
+            pq.add(variables[i]);
+            inpq[i] = true;
+        }
+        //init assStack
+        Variable var = pq.remove();
+        for(int i=0; i<var.domains.getLast().size(); i++){
+            assStack.addLast(new VariableAssigned(var.index, var.domains.getLast().get(i)));
+        }
+
+        while(!assStack.isEmpty()){
+            VariableAssigned varAss = assStack.removeLast();
+            if(used.contains(varAss.index)){
+                while(varAss.index != tmp_sol.getLast().index){
+                    if(!inpq[tmp_sol.getLast().index]) pq.add(variables[tmp_sol.getLast().index]);
+                    used.remove(tmp_sol.getLast().index);
+                    repropagate(tmp_sol, pq);
+                }
+                if(varAss.index == tmp_sol.getLast().index){
+                    repropagate(tmp_sol, pq);
+                }
+
+            }
+            tmp_sol.addLast(varAss);
+            used.add(varAss.index);
+            int size = tmp_sol.size();
+
+            if(size == variables.length){
+                printSol(tmp_sol);
+                solutions.add(convertToArray(tmp_sol));
+                if(findAllSolutions == false){
+                    return;
+                }
+                used.remove(tmp_sol.getLast().index);
+                
+                if(!inpq[tmp_sol.getLast().index]) pq.add(variables[tmp_sol.getLast().index]);
+                tmp_sol.removeLast();
+                continue;
+            }
+            // infer
+            if(!propagate(tmp_sol, pq)){
+                continue;
+            }
+            if(pq.size() >= 1){
+                Variable smallestVariable = pq.remove();
+                inpq[smallestVariable.index] = false;
+                List<Integer> dom = smallestVariable.domains.getLast();
+                for(int i=0; i<dom.size(); i++){
+                    assStack.addLast(new VariableAssigned(smallestVariable.index, dom.get(i)));
+                }
+            }
+            
+        }
+    }
+
+    boolean propagate(Deque<VariableAssigned> sol, PriorityQueue<Variable> pq){
+        List<Integer> affected = variables[sol.getLast().index].affects;
+        for(int a : affected){
+            if(pq.remove(variables[a])){
+                constraints[a].infer(sol);
+                if(variables[a].domain.size() == 0) return false;
+                // pq.add(variables[a]);
+            }
+        }
+        return true;
+    }
+
+    void repropagate(Deque<VariableAssigned> sol, PriorityQueue<Variable> pq){
+        VariableAssigned varAss = sol.getLast();
+        List<Integer> affected = variables[varAss.index].affects;
+        for(int a : affected){
+            if(variables[a].domains.size() > 1){
+                variables[a].domains.removeLast();
+            }
+        }
+        sol.removeLast();
+
+    }

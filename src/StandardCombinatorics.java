@@ -188,7 +188,6 @@ public class StandardCombinatorics {
         // Use solver
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
-
         return result;
     }
 }
