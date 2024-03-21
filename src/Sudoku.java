@@ -22,6 +22,7 @@ public class Sudoku {
             for(int j=0; j<n; j++){
                 
                 List<Integer> d = new ArrayList<>();
+                Set<Integer> affects = new HashSet<>();
                 if(grid[i][j] != -1){
                     d.add(grid[i][j]);
                 } else {
@@ -30,9 +31,15 @@ public class Sudoku {
                     for(int k=0; k<n; k++){
                         if(grid[i][k] != -1){
                             tmpd.remove(grid[i][k]);
+                        } else {
+                            if(k!=j)
+                                affects.add(i*n + k);
                         }
                         if(grid[k][j] != -1){
                             tmpd.remove(grid[k][j]);
+                        } else {
+                            if(k!=i)
+                                affects.add(k*n + j);
                         }
                     }
                     int si = i/sqr;
@@ -45,14 +52,18 @@ public class Sudoku {
                         for(int l = sj; l<sj+sqr; l++){
                             if(grid[k][l] != -1){
                                 tmpd.remove(grid[k][l]);
+                            } else { // if grid kl == -1 then affects
+                                if(k!=i || l!=j)
+                                    affects.add(k*n + l);
                             }
                         }
                     }
                     d.addAll(tmpd);
                     // System.out.println(d.toString());
                 }
-                
-                Solver.Variable newVar = new Solver.Variable(d,-1, i*n+j);
+                List<Integer> aff = new ArrayList<>(affects);
+
+                Solver.Variable newVar = new Solver.Variable(d,-1, i*n+j, aff);
                 newVar.variablesLength = sqr;
                 variables.add(newVar);
                 constraints.add(new Solver.SudokuConstraint(newVar));

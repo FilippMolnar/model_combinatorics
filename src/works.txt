@@ -1,0 +1,36 @@
+/**
+     * Solves the problem using search and inference.
+     */
+    void search2(boolean findAllSolutions /* you can add more params */) {
+        Deque<VariableAssigned> tmp_sol = new LinkedList<>();
+        Deque<VariableAssigned> assStack = new LinkedList<>();
+        
+        for(int i=0; i<variables[0].domain.size(); i++){
+            assStack.addLast(new VariableAssigned(0, variables[0].domain.get(i), i));
+        }
+        while(!assStack.isEmpty()){
+            VariableAssigned var = assStack.removeLast();
+            while(tmp_sol.size() > var.place){
+                if(variables[tmp_sol.size()].domains.size() > 1){
+                    variables[tmp_sol.size()].domains.removeLast();
+                }
+                tmp_sol.removeLast();
+            }
+            tmp_sol.addLast(var);
+            int size = tmp_sol.size();
+
+            //found solution
+            if(size == variables.length){
+                solutions.add(convertToArray(tmp_sol));
+                if(findAllSolutions == false){
+                    return;
+                }
+                tmp_sol.removeLast();
+                continue;
+            }
+            constraints[tmp_sol.size()].infer(tmp_sol);
+            for(int i=0; i<variables[size].domains.getLast().size(); i++){
+                assStack.addLast(new VariableAssigned(size, variables[size].domains.getLast().get(i), i));
+            }
+        }
+    }

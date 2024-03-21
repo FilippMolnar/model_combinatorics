@@ -16,7 +16,12 @@ public class NQueens {
             for(int j=0; j<n; j++){
                 domain.add(j);
             }
-            Solver.Variable newVar = new Solver.Variable(domain,-1, i);
+            List<Integer> affects = new ArrayList<>();
+            for(int j=0; j<n; j++){
+                if(i==j) continue;
+                affects.add(j);
+            }
+            Solver.Variable newVar = new Solver.Variable(domain,-1, i, affects);
             variables.add(newVar);
             constraints.add(new Solver.NQueensConstraint(newVar));
         }

@@ -50,6 +50,9 @@ public class StandardCombinatoricsTest {
         int[] ns = {3, 100, 1000, 20};
         int[] ks = {2, 3, 2, 8};
 
+        // int[] ns = {9};
+        // int[] ks = {6};
+        
         for (int t = 0; t < ns.length; t++) {
             int n = ns[t];
             int k = ks[t];
@@ -112,6 +115,8 @@ public class StandardCombinatoricsTest {
     public void testCombinationsWithRepetition() {
         int[] ns = {3, 100, 12};
         int[] ks = {2, 3, 8};
+        // int[] ns = {2};
+        // int[] ks = {5};
 
         for (int t = 0; t < ns.length; t++) {
             int n = ns[t];
