@@ -408,4 +408,95 @@ class SolverAdam {
         }
 
     }
+    public static int getNQueenSolutions(int n) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
+
+        // Restrict the first variable to range [1, n / 2] to eliminate some horizontal symmetries
+        // After we find every solution for board where the first queen is in the first half of tiles 
+        // then every solution we find when it is in the second half is a horizontal mirror of something we already found
+        // So we can simply find solutions with the first queen in tiles up to (n/2)th tile and multiply them by two
+        // The only edge case is odd n, in which case we need to separately compute the number of solutions when the queen is in the center
+        // tile and add it to the total.
+        List<Integer> domainFirst = new ArrayList<>();
+        for (int i = 0; i < n/2; i++) {
+            domainFirst.add(i+1);
+        }
+        variables.add(new Solver.Variable(domainFirst));
+
+        // Add rest of variables with full range
+        List<Integer> domain = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            domain.add(i+1);
+        }        
+        for (int i = 1; i < n; i++){
+            variables.add(new Solver.Variable(domain));
+        }
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i+1; j < n; j++) {
+                // No column collisions
+                constraints.add(new Solver.NeqConstraint(i, j));
+
+                // No diagonal collisions
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, j-i));
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, i-j));
+            }
+        }
+
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solverEvenHalf = new Solver(variablesArray, constraintsArray);
+        List<int[]> resultEvenHalf = solverEvenHalf.findAllSolutions();
+
+        if (n % 2 == 0) return resultEvenHalf.size() * 2;
+
+        // Get number of solutions when n is odd for the case where first queen is in the middle tile
+        // Initialize lists for variables and constraints
+        variables = new ArrayList<>();
+        constraints = new ArrayList<>();
+
+        domainFirst = new ArrayList<>();
+        domainFirst.add(n/2+1);
+        variables.add(new Solver.Variable(domainFirst));
+
+        // Add rest of variables with full range
+        domain = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            domain.add(i+1);
+        }        
+        for (int i = 1; i < n; i++){
+            variables.add(new Solver.Variable(domain));
+        }
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i+1; j < n; j++) {
+                // No column collisions
+                constraints.add(new Solver.NeqConstraint(i, j));
+
+                // No diagonal collisions
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, j-i));
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, i-j));
+            }
+        }
+
+        // Convert to arrays
+        variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solverCenterPosition = new Solver(variablesArray, constraintsArray);
+        List<int[]> resultCenterPosition = solverCenterPosition.findAllSolutions();
+
+        return resultEvenHalf.size() * 2 + resultCenterPosition.size();
+    }
+}
 }

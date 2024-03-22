@@ -264,7 +264,115 @@ class Solver {
         }
     }
 
-    void search(boolean findAllSolutions) {
+    int findSmallestVariable(Set<Integer> notUsed){
+        int idx = 0;
+        int size = variables.length;
+        for(int i : notUsed){
+            if(variables[i].domains.getLast().size()<size) {
+                idx = i;
+                size = variables[i].domains.getLast().size();
+            }
+        }
+        // for(int i=0; i<variables.length; i++){
+        //     if(!usedPlace[i]) {
+        //         idx = i;
+        //         size = variables[i].domains.getLast().size();
+        //         break;
+        //     }
+        // }
+        // for(int i=idx+1; i<variables.length; i++){
+        //     if(!usedPlace[i] && variables[i].domains.getLast().size()<size) {
+        //         idx = i;
+        //         size = variables[i].domains.getLast().size();
+        //     }
+        // }
+        return idx;
+    }
+
+    void search(boolean findAllSolutions /* you can add more params */) {
+        Deque<VariableAssigned> tmp_sol = new LinkedList<>();
+        Deque<VariableAssigned> assStack = new LinkedList<>();
+        Set<Integer> notUsed = new HashSet<>();
+        boolean[] usedPlace = new boolean[variables.length];
+        
+        //init unusedplace
+        for(int i=0; i<variables.length; i++){
+            notUsed.add(i);
+        }
+
+        int smallestVariable = findSmallestVariable(notUsed);
+        for(int i=0; i<variables[smallestVariable].domain.size(); i++){
+            assStack.addLast(new VariableAssigned(smallestVariable, variables[smallestVariable].domain.get(i)));
+        }
+        notUsed.remove(smallestVariable);
+
+        while(!assStack.isEmpty()){
+            VariableAssigned var = assStack.removeLast();
+            if(!notUsed.contains(var.index)){
+                while(tmp_sol.size() >= 1 && tmp_sol.getLast().index != var.index){
+                    repropagate(tmp_sol, notUsed);
+                    notUsed.add(tmp_sol.getLast().index);
+                    tmp_sol.removeLast();
+                }
+                if(tmp_sol.size() >= 1 && tmp_sol.getLast().index == var.index){
+                    repropagate(tmp_sol, notUsed);
+                    notUsed.add(tmp_sol.getLast().index);
+
+                    tmp_sol.removeLast();
+                }
+            }
+            // repropagate(tmp_sol, usedPlace);
+            tmp_sol.addLast(var);
+            notUsed.remove(var.index);
+            int size = tmp_sol.size();
+
+            //found solution
+            if(size == variables.length){
+                solutions.add(convertToArray(tmp_sol));
+                if(findAllSolutions == false){
+                    return;
+                }
+                notUsed.add(var.index);
+                tmp_sol.removeLast();
+                continue;
+            }
+            // constraints[tmp_sol.size()].infer(tmp_sol);
+            if(!propagate(tmp_sol, notUsed)){
+                continue;
+            }
+            int smallestVar = findSmallestVariable(notUsed);
+            List<Integer> dom = variables[smallestVar].domains.getLast();
+            for(int i=0; i<dom.size(); i++){
+                assStack.addLast(new VariableAssigned(smallestVar, dom.get(i)));
+            }
+        }
+    }
+    void repropagate(Deque<VariableAssigned> sol, Set<Integer> notUsed){
+        List<Integer> affected = variables[sol.getLast().index].affects;
+        for(int a : affected){
+            if(notUsed.contains(a)){
+                Deque<List<Integer>> domains = variables[a].domains;
+                if(domains.size() > 1){
+                    domains.removeLast();
+                }
+            }
+        }
+    }
+
+    boolean propagate(Deque<VariableAssigned> sol, Set<Integer> notUsed){
+        List<Integer> affected = variables[sol.getLast().index].affects;
+        for(int a : affected){
+            if(notUsed.contains(a)){
+                constraints[a].infer(sol);
+                if(variables[a].domains.getLast().size() == 0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void search2(boolean findAllSolutions) {
         Deque<VariableAssigned> tmp_sol = new LinkedList<>();
         Deque<VariableAssigned> assStack = new LinkedList<>();
         PriorityQueue<VariablePQ> pq = new PriorityQueue<>();
