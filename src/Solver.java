@@ -21,11 +21,7 @@ class Solver {
     }
 
 
-    // ABOUT SYMMETRY BREAKING CONSTRAINT:
-    // Our Solver uses DFS that starts with the first variable, tries every value from the domain,
-    // propagates the constraints for the next (second) variable, and tries all the remaining 
-    // values from the domain. Since we encoded our rows as variables in the same order, 
-    // our algorithm will always place queens on rows in the same order, thus breaking symmetry.
+    // SYMMETRY BREAKING CONSTRAINT: Our symmetry breaking constraint is implemented in the preprocessing and postprocessing steps in NQueens.java
     static class NQueensConstraint extends Constraint{
         Variable var;
 
