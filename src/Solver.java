@@ -11,13 +11,11 @@ class Solver {
         void infer(Deque<VariableAssigned> tmp_sol) {
             Set<Integer> newDomain = new HashSet<>(this.var.domains.getLast());
             
-            for (VariableAssigned v : tmp_sol) {
-                if(this.var.affects.contains(v.index)){
-                    newDomain.remove(v.value);
-                }
+            VariableAssigned v = tmp_sol.getLast();
+            if(this.var.affects.contains(v.index)){
+                newDomain.remove(v.value);
             }
 
-            // this.var.domain = newDomain;
             this.var.domains.addLast(new ArrayList<>(newDomain));
         }
     }
@@ -361,13 +359,18 @@ class Solver {
 
     boolean propagate(Deque<VariableAssigned> sol, Set<Integer> notUsed){
         List<Integer> affected = variables[sol.getLast().index].affects;
+        boolean flag = false;
         for(int a : affected){
             if(notUsed.contains(a)){
                 constraints[a].infer(sol);
-                if(variables[a].domains.getLast().size() == 0){
-                    return false;
-                }
             }
+            if(variables[a].domains.getLast().size() == 0){
+                flag = true;
+            }
+
+        }
+        if(flag){
+            return false;
         }
         return true;
     }
