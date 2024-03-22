@@ -14,7 +14,10 @@ public class NQueens {
             List<Integer> domain = new ArrayList<>();
             // Add all columns to domain
             for(int j=0; j<n; j++){
-                domain.add(j);
+                // SYMMETRY BREAKING CONSTRAINT: Only look at half of the Queen positions in the first row, then add the symmetric solutions at the end.
+                if((i != 0) || (j <= (n-1)/2)){
+                    domain.add(j);
+                }
             }
             List<Integer> affects = new ArrayList<>();
             for(int j=0; j<n; j++){
@@ -36,6 +39,19 @@ public class NQueens {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        return result.size();
+        // SYMMETRY BREAKING CONSTRAINT: Adding symmetric solutions.
+        List<int[]> newResult = new LinkedList<>();
+        for(int[] sol : result){
+            newResult.add(sol);
+            if(sol[0] != n/2){
+                int[] mirror = new int[n];
+                for (int i = 0; i < n; i++) {
+                    mirror[i] = n - 1 - sol[i];
+                }
+                newResult.add(mirror);
+            }
+        }
+
+        return newResult.size();
     }
 }
